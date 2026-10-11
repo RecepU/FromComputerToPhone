@@ -1,0 +1,14 @@
+# Physical-device verification (not implied by automated tests)
+
+Record browser/version, device, networks, TURN setting and outcome for each run. Test current Windows Chrome and Edge, iPhone Safari, and Android Chrome. Use the public HTTPS deployment. Never save a still-valid QR or transferred private content in test reports.
+
+1. Open desktop, scan with camera, verify the public HTTPS URL and guest fragment is removed. Confirm the QR disappears and both interfaces are enabled only after the data channel opens.
+2. Send multiline text, Turkish/Chinese text, emojis and HTTPS links in each direction. Test literal HTML/script-like text, unsafe URL schemes, Copy (explicit permission/user action), and long-text validation.
+3. Send PNG/JPEG/WebP/GIF using each device's picker. Paste a Windows screenshot and drag/drop. Verify previews, original file bytes/download filename, progress for near-10-MiB images and cancellation from both ends. Reject SVG, invalid MIME/signature and >10 MiB files. Confirm another transfer works after cancellation.
+4. Try a third phone with the live QR and a guest credential as a host authorization; both must fail. Close/leave the guest: desktop keeps room alive, displays new QR, and old guest URL fails. Scan new QR to pair.
+5. Interrupt host connectivity for less than 15 seconds after a clean socket disconnect; in-memory reconnection may succeed. Leave host disconnected longer: guest eventually sees Session Ended and content clears. For a silent link loss allow 45-second liveness detection plus grace and alarm scheduling. Mobile/background suspension may end a room; no popup can appear in a closed tab.
+6. End on desktop and confirm the dialog. Verify guest terminal state, feed cleared, blob previews no longer usable and old QR rejected. Reopen root: entirely new room, no restored history. Explicit downloads/clipboard copies intentionally remain outside app control.
+7. On a test deployment only, lower SESSION_TTL_SECONDS to a few seconds, leave both devices connected and sending heartbeats, verify backend expiration and old URL rejection. Restore 86400 before production.
+8. Test same Wi-Fi, desktop Wi-Fi vs phone cellular, restrictive corporate/hotel networks, and TURN-enabled relay. Record failures honestly; STUN alone cannot guarantee cross-network connectivity. Verify TURN credentials expire and relay logs do not expose shared secrets.
+9. Check narrow viewport, landscape, virtual keyboard, dark mode, 200% zoom, keyboard-only flow, focus indicators, screen reader status announcements, confirm/cancel dialog focus and reduced-motion setting. Ensure no horizontal scrolling.
+10. Inspect production response CSP, no-store, no-referrer, nosniff and denied framing. Inspect Worker logs: no transferred text, binary bytes, credentials or complete QR URLs. Check quota usage and cleanup records on a non-sensitive test room.

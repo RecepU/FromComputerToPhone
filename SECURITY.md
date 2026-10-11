@@ -1,0 +1,20 @@
+# Security and privacy
+
+- Room ID, host secret and guest secret each use 32 cryptographically random bytes encoded as base64url. Secrets are separate, hashed for lifecycle storage and compared without early-exit comparisons. Possessing the QR permits guest access only; it cannot terminate the room or authenticate as host.
+- Production requires HTTPS/WSS. Worker validates an exact allowlist of Origins for both HTTP and WebSocket upgrade. CORS is not authentication; capabilities remain necessary. No-Origin clients are rejected. Origin headers can be forged by non-browser clients, so rate limits and tokens protect those paths as well.
+- Guest QR expires after ten minutes and rotates on disconnect or host refresh. Only one guest is admitted; occupied-room refresh is refused. Rotation does not grant privileges to the old QR.
+- Create limit: 30 requests per IP per minute. Access limit: 120 requests per IP per minute. Per-room socket limit: four including pending handshakes; authenticated occupancy: two. Per-socket signaling: 100 messages / ten seconds. Strict schemas reject extra fields and oversized payloads. Text/image data never routes through signaling. IP limiter counters are deleted at the next minute boundary. Rate limits can penalize shared NAT users; they are a small-MVP abuse control, not comprehensive DDoS protection.
+- Static response headers prohibit framing, plugins, unsafe scripts, unsafe styles and referrer disclosure. Build emits a CSP connect-src restricted to self and the configured Worker origin. Pages _headers is necessary; generic hosting must apply equivalent headers. No analytics or service worker. Transferred text uses escaped React nodes, never HTML injection. Only HTTP/HTTPS strings become links, with noopener/noreferrer. SVG and HTML files are rejected; image MIME, size, format signature and SHA-256 are verified.
+- All UI temporary content and object URLs are cleared on terminal state or disposal. Acknowledgments indicate protocol receipt, not that the human viewed an item. Explicit user copies/downloads survive outside application control. Browser, OS and network forensic retention cannot be excluded; this is not a secure memory eraser.
+
+## Metadata and trust boundaries
+
+Cloudflare handles IP addresses, Origins, connection timing, room routing identifiers, hashed capabilities and signaling including SDP/ICE network metadata. The STUN service learns network addresses. A TURN operator can observe timing and encrypted traffic volume. WebRTC encrypts data in transit (DTLS), including through TURN, but the frontend and signaling service are trusted; a malicious operator who changes their code can compromise pairing or inspect content. There is no independent peer fingerprint confirmation, verified identity or claim of protection from a compromised operator/device.
+
+Worker observability is disabled in config, and application code logs no payloads or secrets. Wrangler development access logs may show room IDs, not authorization message bodies. Cloudflare provider logging/retention and browser tooling are outside application guarantees. Do not enable payload logging, traces or full-URL analytics. QR screenshots and clipboard text are sensitive. Default automated browser traces/video are disabled.
+
+TURN REST shared secrets are only Wrangler secrets. The frontend receives short-lived credentials after room authorization. Restrict TURN ports/realms and bandwidth independently. A stolen live guest capability can race the intended phone for the one guest slot; anyone with the QR should be treated as authorized until it expires. Share the QR only with your own device.
+
+## Deployment hygiene
+
+Keep `.env*`, `.dev.vars`, Cloudflare API tokens and TURN shared secrets out of Git. Use `.env.example` and `.dev.vars.example` as templates. Use exact production origins, not `*`. Never set a test-shortened TTL/grace in production inadvertently. The session TTL configuration is clamped to 24 hours. Do not deploy public creation endpoints without monitoring quotas and reviewing this MVP's abuse controls. See manual test checks for origin rejection, replay and teardown.

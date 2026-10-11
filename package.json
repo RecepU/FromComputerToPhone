@@ -1,0 +1,56 @@
+{
+  "name": "from-computer-to-phone",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "wrangler dev --config apps/signaling/wrangler.jsonc --port 8787",
+    "dev:web": "vite --config apps/web/vite.config.ts --host 0.0.0.0",
+    "build": "vite build --config apps/web/vite.config.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "deploy:api": "wrangler deploy --config apps/signaling/wrangler.jsonc"
+  },
+  "dependencies": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "lucide-react": "1.55.0",
+    "qrcode": "^1.5.4",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261011.1",
+    "@playwright/test": "1.64.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/jest-dom": "^6.9.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/qrcode": "^1.5.5",
+    "@vitejs/plugin-react": "6.1.2",
+    "@tailwindcss/vite": "^4.1.0",
+    "tailwindcss": "^4.1.0",
+    "concurrently": "^9.2.0",
+    "eslint": "10.12.0",
+    "typescript-eslint": "^8.0.0",
+    "eslint-plugin-react-hooks": "^7.0.0",
+    "prettier": "^3.6.0",
+    "typescript": "5.9.3",
+    "vite": "8.3.4",
+    "vitest": "5.0.3",
+    "jsdom": "^27.0.0",
+    "wrangler": "4.149.0",
+    "jsqr": "^1.4.0",
+    "pngjs": "^7.0.0",
+    "@types/pngjs": "^6.0.0",
+    "ws": "^8.18.0",
+    "@types/ws": "^8.18.0"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}
