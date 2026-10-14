@@ -32,12 +32,14 @@ export function TransferCard({
   onError: (s: string) => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [manual, setManual] = useState(false);
   async function copy() {
     try {
       if (!navigator.clipboard) throw new Error();
       await navigator.clipboard.writeText(item.text!);
       setCopied(true);
     } catch {
+      setManual(true);
       onError('Copy is unavailable. Select the text and copy it manually.');
     }
   }
@@ -66,6 +68,17 @@ export function TransferCard({
             {copied ? <Check size={16} /> : <Copy size={16} />}{' '}
             {copied ? 'Copied!' : 'Copy text'}
           </button>
+          {manual && (
+            <label className="manual-copy">
+              Select and copy manually
+              <textarea
+                aria-label="Select text to copy manually"
+                readOnly
+                value={item.text}
+                onFocus={(e) => e.currentTarget.select()}
+              />
+            </label>
+          )}
         </>
       ) : (
         <>

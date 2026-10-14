@@ -32,6 +32,25 @@ interface Incoming {
   sequence: number;
   timer: ReturnType<typeof setTimeout>;
 }
+export interface TransferChannel {
+  binaryType: string;
+  bufferedAmountLowThreshold: number;
+  readonly bufferedAmount: number;
+  readonly readyState: string;
+  onmessage: ((event: MessageEvent) => void) | null;
+  send(data: string | ArrayBuffer): void;
+  addEventListener(
+    type: string,
+    listener: () => void,
+    options?: AddEventListenerOptions,
+  ): void;
+  removeEventListener(type: string, listener: () => void): void;
+}
+export interface TransferOptions {
+  uuid?: () => string;
+  digest?: (data: ArrayBuffer) => Promise<string>;
+  maxFileSize?: number;
+}
 export class Transfer {
   private incoming: Incoming | null = null;
   private outgoing: string | null = null;
@@ -47,10 +66,11 @@ export class Transfer {
   >();
   private disposed = false;
   constructor(
-    private channel: RTCDataChannel,
+    private channel: TransferChannel,
     private onItem: (i: Item) => void,
     private onProgress: (p: Progress | null, id?: string) => void,
     private onError: (s: string) => void,
+    private options: TransferOptions = {},
   ) {
     channel.binaryType = 'arraybuffer';
     channel.bufferedAmountLowThreshold = 65536;
@@ -91,7 +111,7 @@ export class Transfer {
   async sendText(text: string): Promise<void> {
     if (!text.trim() || new TextEncoder().encode(text).length > MAX_TEXT_BYTES)
       throw new Error('Enter text up to 64 KB.');
-    const id = crypto.randomUUID(),
+    const id = this.options.uuid?.() ?? crypto.randomUUID(),
       timestamp = Date.now();
     this.control({ type: 'text', id, text, timestamp });
     const confirmation = this.confirmation(id);
@@ -101,13 +121,16 @@ export class Transfer {
   async sendFile(file: File): Promise<void> {
     if (this.outgoing)
       throw new Error('Finish or cancel the current image first.');
-    if (file.size <= 0 || file.size > MAX_FILE_SIZE)
+    if (
+      file.size <= 0 ||
+      file.size > (this.options.maxFileSize ?? MAX_FILE_SIZE)
+    )
       throw new Error(
-        `Choose an image up to ${MAX_FILE_SIZE / 1024 / 1024} MB.`,
+        `Choose an image up to ${(this.options.maxFileSize ?? MAX_FILE_SIZE) / 1024 / 1024} MB.`,
       );
     if (!imageMime.safeParse(file.type).success)
       throw new Error('Choose a PNG, JPEG, WebP or GIF image.');
-    const id = crypto.randomUUID();
+    const id = this.options.uuid?.() ?? crypto.randomUUID();
     this.outgoing = id;
     try {
       const bytes = await file.arrayBuffer();
@@ -117,7 +140,7 @@ export class Transfer {
         name: safeImageName(file.name, file.type),
         mime: file.type,
         size: file.size,
-        sha256: await digest(bytes),
+        sha256: await (this.options.digest ?? digest)(bytes),
       }) as FileMeta;
       if (!validImageSignature(new Uint8Array(bytes), file.type))
         throw new Error('Choose a valid PNG, JPEG, WebP or GIF image.');
@@ -338,7 +361,8 @@ export class Transfer {
         offset += chunk.length;
       }
       if (
-        (await digest(bytes.buffer)) !== incoming.meta.sha256 ||
+        (await (this.options.digest ?? digest)(bytes.buffer)) !==
+          incoming.meta.sha256 ||
         !validImageSignature(bytes, incoming.meta.mime)
       )
         throw new Error('Image integrity check failed');

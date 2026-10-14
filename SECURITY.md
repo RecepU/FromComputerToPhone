@@ -1,5 +1,9 @@
 # Security and privacy
 
+## Additional local POC security boundary
+
+Default local mode is unencrypted HTTP/WS for trusted same-Wi-Fi use only. No public exposure. Host/guest capabilities remain separate; exact origins/hosts, private client addresses, rotating guest secrets, deadlines, occupancy, payload, rate and backpressure limits are enforced. Node sees relayed content transiently; no transfer content is stored on disk. Use Private-only Windows Firewall rules. HTTP clipboard writes may require manual selection. See [LOCAL_SETUP.md](LOCAL_SETUP.md). The original encrypted cloud guarantees below apply only to cloud mode.
+
 - Room ID, host secret and guest secret each use 32 cryptographically random bytes encoded as base64url. Secrets are separate, hashed for lifecycle storage and compared without early-exit comparisons. Possessing the QR permits guest access only; it cannot terminate the room or authenticate as host.
 - Production requires HTTPS/WSS. Worker validates an exact allowlist of Origins for both HTTP and WebSocket upgrade. CORS is not authentication; capabilities remain necessary. No-Origin clients are rejected. Origin headers can be forged by non-browser clients, so rate limits and tokens protect those paths as well.
 - Guest QR expires after ten minutes and rotates on disconnect or host refresh. Only one guest is admitted; occupied-room refresh is refused. Rotation does not grant privileges to the old QR.

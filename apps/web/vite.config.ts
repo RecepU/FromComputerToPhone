@@ -3,16 +3,25 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import react from '@vitejs/plugin-react';
 import tailwind from '@tailwindcss/vite';
 export default defineConfig(({ mode }) => {
+  const local =
+    mode !== 'cloud' &&
+    (mode === 'lan' || process.env.VITE_APP_MODE !== 'cloud');
   const env = loadEnv(mode, 'apps/web', 'VITE_');
   const endpoint = env.VITE_API_URL || process.env.VITE_API_URL || '';
   return {
     root: 'apps/web',
+    define: {
+      'import.meta.env.VITE_APP_MODE': JSON.stringify(
+        local ? 'local' : 'cloud',
+      ),
+    },
     plugins: [
       react(),
       tailwind(),
       {
         name: 'production-security-headers',
         closeBundle() {
+          if (local) return;
           let connections = "'self'";
           if (endpoint) {
             const url = new URL(endpoint);
@@ -33,6 +42,6 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
       proxy: { '/api': { target: 'http://127.0.0.1:8787', ws: true } },
     },
-    build: { outDir: 'dist', emptyOutDir: true },
+    build: { outDir: local ? 'dist-local' : 'dist', emptyOutDir: true },
   };
 });

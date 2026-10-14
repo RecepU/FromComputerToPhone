@@ -1,16 +1,20 @@
 # FromComputerToPhone
 
+**Default mode is now the same-Wi-Fi LOCAL POC.** Double-click `start-local.bat`, or run `npm ci` then `npm run dev`; open `http://localhost:3000`. See [LOCAL_SETUP.md](LOCAL_SETUP.md) for LAN IP override, phone connection, Private firewall rules and browser limits.
+
+The original cloud implementation below is preserved as optional `cloud` mode: `npm run dev:cloud`, `npm run build:cloud`, `npm run test:e2e:cloud`. Its source, dependencies, deployment configuration and tests remain intact. Local mode uses unencrypted HTTP/WS on trusted private Wi-Fi only.
+
 Open on your computer → scan with your phone → share → end the session.
 
 A React/TypeScript application with Cloudflare Workers + SQLite-backed Durable Objects for capability-authorized WebSocket signaling. Text and original images travel over an encrypted, ordered WebRTC data channel. No accounts, analytics, transfer database or uploaded image storage.
 
-## Run locally
+## Original cloud mode: local development
 
 Requires Node 22.13+ and npm. The checked-in lockfile pins compatible dependencies; TypeScript 5.9 is used within typescript-eslint's supported range.
 
 ```sh
 npm ci
-npm run dev
+npm run dev:cloud
 ```
 
 Open `http://localhost:5173`. Vite proxies `/api` to Wrangler on port 8787. Two desktop browser contexts work locally. **A physical phone needs a publicly reachable HTTPS frontend and WSS backend**; a localhost QR points to the phone itself. See [DEPLOYMENT.md](DEPLOYMENT.md). Plain LAN HTTP cannot provide the required secure browser APIs.
@@ -19,9 +23,9 @@ Open `http://localhost:5173`. Vite proxies `/api` to Wrangler on port 8787. Two 
 npm run lint
 npm run typecheck
 npm test
-npm run build
+npm run build:cloud
 npx playwright install chromium
-npm run test:e2e
+npm run test:e2e:cloud
 ```
 
 E2E starts the real Wrangler runtime, a short-lived expiry runtime on port 8788, and Vite. Keep 5173, 8787 and 8788 free. It uses independent browser contexts and decodes the QR image. Backend integration tests are included in `test:e2e`. Failure traces, videos and automatic failure screenshots are disabled. Explicit visual QA PNGs are saved under ignored `.local-preview/`; their QR becomes unusable when the test room ends/runtime shuts down. Treat any screenshots of live credentials or private content as sensitive.

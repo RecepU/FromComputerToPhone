@@ -4,18 +4,25 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k \"npm:dev:api\" \"npm:dev:web\"",
+    "dev": "npm run build:local && npm run start:local",
+    "dev:cloud": "concurrently -k \"npm:dev:api\" \"npm:dev:web\"",
+    "start:local": "tsx apps/local/src/main.ts",
+    "build:local": "vite build --config apps/web/vite.config.ts --mode lan",
+    "build:cloud": "vite build --config apps/web/vite.config.ts --mode cloud",
     "dev:api": "wrangler dev --config apps/signaling/wrangler.jsonc --port 8787",
-    "dev:web": "vite --config apps/web/vite.config.ts --host 0.0.0.0",
+    "dev:web": "vite --config apps/web/vite.config.ts --mode cloud --host 0.0.0.0",
     "build": "vite build --config apps/web/vite.config.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --config playwright.local.config.ts",
+    "test:e2e:cloud": "playwright test --config playwright.config.ts",
     "deploy:api": "wrangler deploy --config apps/signaling/wrangler.jsonc"
   },
   "dependencies": {
+    "@noble/hashes": "1.8.0",
+    "ws": "^8.18.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "lucide-react": "1.55.0",
@@ -23,6 +30,7 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
+    "tsx": "^4.20.0",
     "@cloudflare/workers-types": "5.20261011.1",
     "@playwright/test": "1.64.0",
     "@testing-library/react": "^16.3.0",
@@ -47,7 +55,6 @@
     "jsqr": "^1.4.0",
     "pngjs": "^7.0.0",
     "@types/pngjs": "^6.0.0",
-    "ws": "^8.18.0",
     "@types/ws": "^8.18.0"
   },
   "engines": {

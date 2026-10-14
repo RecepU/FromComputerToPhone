@@ -1,5 +1,11 @@
 # Architecture
 
+## Additional local POC mode
+
+Default local mode serves `apps/web/dist-local` and `/api/local` HTTP/WebSockets from `apps/local/src` on one Node process. Memory-only rooms relay validated text and binary chunks; streaming SHA-256 state validates image bytes without retaining entire images. `services/mode.ts` selects the session implementation and reuses the QR, feed, transfer and UI components. See [LOCAL_SETUP.md](LOCAL_SETUP.md).
+
+The existing cloud architecture below remains optional. Its original backend, WebRTC service and `dist` output are preserved.
+
 ## Transport and trust
 
 The static Pages frontend creates a room by POSTing to the Worker. The Worker selects a cryptographically random Durable Object name and calls its internal `/create` endpoint. Public clients cannot initialize a chosen or previously terminated room. A room stores only hashes of its two capabilities, absolute expiry, pairing expiry and host disconnection deadline in its SQLite-backed Durable Object storage. These lifecycle records are deleted when the room ends. They survive runtime hibernation/restart so server expiry and host ownership remain enforceable. No text, files or SDP is stored in this storage.

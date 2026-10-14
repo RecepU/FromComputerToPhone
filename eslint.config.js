@@ -5,6 +5,7 @@ export default tseslint.config(
     ignores: [
       'node_modules/**',
       '**/dist/**',
+      '**/dist-local/**',
       '**/.wrangler/**',
       '**/.local-preview/**',
       'playwright-report/**',

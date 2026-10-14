@@ -1,5 +1,6 @@
 node_modules/
 apps/web/dist/
+apps/web/dist-local/
 .wrangler/
 playwright-report/
 test-results/

@@ -18,7 +18,12 @@ import {
   Check,
   Wifi,
 } from 'lucide-react';
-import { Session, type SessionView } from '../services/session';
+import type { SessionView } from '../services/session';
+import {
+  createSession,
+  localMode,
+  type SessionController,
+} from '../services/mode';
 import type { Item, Progress } from '../services/transfer';
 import { TransferCard } from '../components/TransferCard';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -47,7 +52,7 @@ export function App() {
     [sending, setSending] = useState(false),
     [drag, setDrag] = useState(false),
     [now, setNow] = useState(Date.now());
-  const session = useRef<Session | null>(null),
+  const session = useRef<SessionController | null>(null),
     feed = useRef<Item[]>([]),
     picker = useRef<HTMLInputElement>(null);
   function clear() {
@@ -59,7 +64,7 @@ export function App() {
     setProgress([]);
   }
   useEffect(() => {
-    const current = new Session({
+    const current = createSession({
       view: setView,
       error: setError,
       progress: (p, id) =>
@@ -276,7 +281,17 @@ export function App() {
                     )}
                   </div>
                   <h2>Scan with your phone to connect</h2>
-                  <p>Use your phone’s camera. No app needed.</p>
+                  <p>
+                    {localMode
+                      ? 'Connect your phone to the same Wi-Fi, then scan with its camera.'
+                      : 'Use your phone’s camera. No app needed.'}
+                  </p>
+                  {localMode && (
+                    <p className="qr-expiry">
+                      Local network POC · HTTP traffic is not encrypted. Use
+                      trusted Wi-Fi.
+                    </p>
+                  )}
                   <div className="waiting" role="status">
                     <span className="status-dot" />
                     {view.status}
@@ -495,7 +510,11 @@ export function App() {
           <ShieldCheck size={16} /> No account required
         </span>
         <span>No permanent storage</span>
-        <span>Secure temporary sharing</span>
+        <span>
+          {localMode
+            ? 'Same Wi-Fi · temporary sharing'
+            : 'Secure temporary sharing'}
+        </span>
         <small>Close the session. Leave nothing behind.</small>
       </footer>
       {confirm && (
