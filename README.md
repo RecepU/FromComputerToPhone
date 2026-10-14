@@ -1,5 +1,7 @@
 # FromComputerToPhone
 
+GitHub Pages publication uses the preserved cloud mode with a separate signaling Worker. See [GITHUB_PAGES_SETUP.md](GITHUB_PAGES_SETUP.md); the default local startup remains unchanged.
+
 **Default mode is now the same-Wi-Fi LOCAL POC.** Double-click `start-local.bat`, or run `npm ci` then `npm run dev`; open `http://localhost:3000`. See [LOCAL_SETUP.md](LOCAL_SETUP.md) for LAN IP override, phone connection, Private firewall rules and browser limits.
 
 The original cloud implementation below is preserved as optional `cloud` mode: `npm run dev:cloud`, `npm run build:cloud`, `npm run test:e2e:cloud`. Its source, dependencies, deployment configuration and tests remain intact. Local mode uses unencrypted HTTP/WS on trusted private Wi-Fi only.

@@ -4,6 +4,7 @@ import {
   type Signal,
 } from '../../../../packages/shared/protocol';
 import { Transfer, type Item, type Progress } from './transfer';
+import { appHome, applicationPath } from './paths';
 export type Status =
   | 'Starting'
   | 'Waiting for device'
@@ -76,8 +77,9 @@ export class Session {
       return;
     }
     try {
-      if (location.pathname.startsWith('/join/')) {
-        const credentials = joinCredentials(location.pathname, location.hash);
+      const path = applicationPath(location.pathname);
+      if (path.startsWith('/join/')) {
+        const credentials = joinCredentials(path, location.hash);
         if (!credentials)
           throw new Error('Invalid QR code. Scan a new QR on your computer.');
         this.room = credentials.room;
@@ -119,7 +121,7 @@ export class Session {
   }
   private pair(): void {
     this.update({
-      pairUrl: `${location.origin}/join/${this.room}#${this.guest}`,
+      pairUrl: `${location.origin}${appHome}join/${this.room}#${this.guest}`,
     });
   }
   private signal(message: Signal): void {

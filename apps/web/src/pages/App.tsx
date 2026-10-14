@@ -28,6 +28,7 @@ import type { Item, Progress } from '../services/transfer';
 import { TransferCard } from '../components/TransferCard';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { MAX_FILE_SIZE } from '../../../../packages/shared/protocol';
+import { appHome } from '../services/paths';
 const initial: SessionView = {
   status: 'Starting',
   role: 'host',
@@ -164,7 +165,11 @@ export function App() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <a className="brand" href="/" aria-label="FromComputerToPhone home">
+        <a
+          className="brand"
+          href={appHome}
+          aria-label="FromComputerToPhone home"
+        >
           <span className="brand-icon">
             <MonitorSmartphone size={23} />
           </span>
@@ -215,7 +220,10 @@ export function App() {
               cleared.
             </p>
             {view.error && <p>{view.error}</p>}
-            <button className="primary" onClick={() => location.assign('/')}>
+            <button
+              className="primary"
+              onClick={() => location.assign(appHome)}
+            >
               Start New Session <ArrowRight size={18} />
             </button>
           </section>
@@ -496,7 +504,7 @@ export function App() {
                 </button>
                 <button
                   className="text-button"
-                  onClick={() => location.assign('/')}
+                  onClick={() => location.assign(appHome)}
                 >
                   Start New Session
                 </button>
